@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar</title>
+  <style>
+
+    table {
+      width: 600px;
+      border-collapse: collapse;
+      margin: 0 auto;
+    }
+    #head {
+      padding: 30px;
+      font-size: larger;
+    }
+    #head button {
+      margin: 25px;
+      width: 100px;
+      height: 30px;
+      border-radius: 45%;
+      border: none;
+      background-color: mediumaquamarine;
+    }
+    #head span {
+      font-size: larger;
+    }
+    td {
+      border: 2px solid mediumaquamarine;
+      text-align:center;
+      cursor: pointer;
+      height: 25px;
+      width: 100px;
+      padding-bottom: 50px;
+    }
+
+    td:hover {
+      background-color: rgb(221, 232, 228);
+    }
+
+    .has-note {
+      background-color: rgba(102, 205, 171, 0.425)
+    }
+
+  </style>
+</head>
+<body>
+  <table>
+    <thead>
+      <tr>
+        <th colspan="7" id = "head">
+          <button onclick="previousMonth()">Previous</button>
+          <span id="month-year"></span>
+          <button onclick="nextMonth()">Next</button>
+        </th>
+      </tr>
+      <tr>
+        <th>Sun</th>
+        <th>Mon</th>
+        <th>Tue</th>
+        <th>Wed</th>
+        <th>Thu</th>
+        <th>Fri</th>
+        <th>Sat</th>
+      </tr>
+    </thead>
+    <tbody id="calendar-body" onclick="dateClicked(event)">
+    </tbody>
+  </table>
+
+  <script>
+    let currentDate = new Date();
+    let currentMonth = currentDate.getMonth();
+    let currentYear = currentDate.getFullYear();
+    let notes = {};
+
+    function renderCalendar() {
+      const calendarBody = document.getElementById("calendar-body");
+      const monthYearHeader = document.getElementById("month-year");
+
+      monthYearHeader.textContent = `${currentYear}년 ${currentMonth + 1}월`;
+
+      calendarBody.innerHTML = "";
+
+      const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+      const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0);
+      const daysInMonth = lastDayOfMonth.getDate();
+
+      for (let i = 0; i < 6; i++) {
+        const row = document.createElement("tr");
+
+        for (let j = 0; j < 7; j++) {
+          const cell = document.createElement("td");
+          const date = i * 7 + j - firstDayOfMonth.getDay() + 1;
+
+          if (date > 0 && date <= daysInMonth) {
+            cell.textContent = date;
+
+            if (notes[currentYear] && notes[currentYear][currentMonth + 1] && notes[currentYear][currentMonth + 1][date]) {
+              cell.title = notes[currentYear][currentMonth + 1][date];
+              cell.classList.add("has-note");
+            }
+          }
+
+          row.appendChild(cell);
+        }
+
+        calendarBody.appendChild(row);
+      }
+    }
+
+    function previousMonth() {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    }
+
+    function nextMonth() {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    }
+
+    function dateClicked(event) {
+      if (event.target.tagName === 'TD' && event.target.textContent !== '') {
+        const selectedDate = parseInt(event.target.textContent, 10);
+        let userInput = '';
+
+
+        if (notes[currentYear] && notes[currentYear][currentMonth + 1] && notes[currentYear][currentMonth + 1][selectedDate]) {
+          userInput = notes[currentYear][currentMonth + 1][selectedDate];
+        }
+
+        userInput = prompt(`Enter text for ${currentYear}-${currentMonth + 1}-${selectedDate}:`, userInput);
+
+        if (userInput !== null) {
+
+          if (!notes[currentYear]) notes[currentYear] = {};
+          if (!notes[currentYear][currentMonth + 1]) notes[currentYear][currentMonth + 1] = {};
+          notes[currentYear][currentMonth + 1][selectedDate] = userInput;
+
+          renderCalendar(); 
+          
+        }
+      }
+    }
+
+    renderCalendar();
+  </script>
+</body>
+</html>
